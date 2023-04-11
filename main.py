@@ -6,7 +6,6 @@ import json
 def read_bot_token():
     with open("secrets.json") as f:
         data = json.load(f)
-        print(f"data from json: {data}")
         return data["DISCORD_TOKEN"]
 
 bot=commands.Bot(
@@ -30,7 +29,7 @@ async def help(ctx):
 
 @bot.command()
 async def ping(ctx):
-    embed=discord.Embed(title="Ping Command", description=f"Pong! {round(bot.latency * 1000)}ms", color=0x7289da)
+    embed=discord.Embed(title="Ping Command", description=f"🏓 Pong! {round(bot.latency * 1000)}ms", color=0x7289da)
     await ctx.reply(embed=embed)
 
 @bot.command()
