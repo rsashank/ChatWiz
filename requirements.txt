@@ -1,2 +1,6 @@
 discord
 asyncio
+re
+json
+random
+lavalink
