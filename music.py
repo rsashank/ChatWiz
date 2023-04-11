@@ -3,7 +3,6 @@ import re
 import random
 import discord
 import lavalink
-import asyncio
 from discord.ext import commands
 
 url_rx = re.compile(r'https?://(?:www\.)?.+')
