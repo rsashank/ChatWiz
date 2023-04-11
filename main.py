@@ -58,5 +58,24 @@ async def remindme(ctx, time, *, message: str):
     embed=discord.Embed(description=f"You asked me to remind you about \"{message}\", {counter} ago. ", color=0x7289da)
     await ctx.send(f"Hey {ctx.author.mention},", embed=embed)
 
+@bot.command()
+async def join(ctx):
+    if ctx.author.voice.channel:
+        channel = ctx.author.voice.channel
+        await channel.connect()
+        await ctx.send(f"I have connected to {channel}.")
+
+    else:
+        await ctx.send("You are not connected to a voice channel.")
+
+@bot.command()
+async def leave(ctx):
+    if ctx.voice_client:
+        await ctx.guild.voice_client.disconnect()
+        await ctx.send("I have left the voice channel.")
+
+    else:
+        await ctx.send("I am not connected to a voice channel.")
+
 token = read_bot_token()
 bot.run(token)
