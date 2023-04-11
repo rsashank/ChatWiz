@@ -1,3 +1,5 @@
 settings.json
 __pycache__
 secrets.json
+logs
+.vscode
