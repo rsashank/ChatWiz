@@ -3,3 +3,4 @@ __pycache__
 secrets.json
 logs
 .vscode
+testfile.py
