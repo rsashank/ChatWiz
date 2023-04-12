@@ -14,7 +14,6 @@ ListColours = [
     0xf46fa8,
     0x9dc6ca,
     0xffea95,
-    0xffa88c
 ]
 
 def read_bot_token():
