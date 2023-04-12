@@ -3,6 +3,7 @@ import asyncio
 from discord.ext import commands
 import json
 import random
+import openai
 
 ListColours = [
     0xbed5e7, 
@@ -21,6 +22,13 @@ def read_bot_token():
         data = json.load(f)
         return data["DISCORD_TOKEN"]
 
+def read_openai_token():
+    with open("secrets.json") as f:
+        data = json.load(f)
+        return data["OPENAI_TOKEN"]
+
+openai.api_key= read_openai_token()
+    
 bot=commands.Bot(
     command_prefix="!",
     intents=discord.Intents.all(),
@@ -31,7 +39,7 @@ bot=commands.Bot(
 @bot.event
 async def on_ready():
     print(f'Logged in as: {bot.user}')
-    await bot.load_extension("music")
+    await bot.load_extension("music") 
 
 @bot.command()
 async def help(ctx):
@@ -48,6 +56,8 @@ async def help(ctx):
     embed.add_field(name="!stop", value="Stops the music", inline=False)
     embed.add_field(name="!nowplaying", value="Shows the current song", inline=False)
     embed.add_field(name="!disconnect", value="Disconnects the bot", inline=False)
+    embed.add_field(name="!gptchannel", value="Sets the GPT-3 chat channel", inline=False)
+    embed.add_field(name="!gpt3", value="Talk to GPT-3", inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
@@ -80,6 +90,35 @@ async def remindme(ctx, time, *, message: str):
     await asyncio.sleep(seconds)
     embed=discord.Embed(description=f"You asked me to remind you about \"{message}\", {counter} ago. ", color=random.choice(ListColours))
     await ctx.send(f"Hey {ctx.author.mention},", embed=embed)
+
+gpt3_channel_id = None
+
+@bot.command()
+async def gptchannel(ctx, channel: discord.TextChannel):
+    global gpt3_channel_id
+    gpt3_channel_id = channel.id
+    await ctx.reply(f"GPT-3 chat channel set to <#{channel.id}>.")
+
+@bot.event
+async def on_message(message):
+    global gpt3_channel_id
+    if gpt3_channel_id:
+        if message.channel.id == int(gpt3_channel_id) and message.author != bot.user:
+            response = openai.Completion.create(
+                model="text-davinci-003",
+                prompt=message.content,
+                temperature=0.5,
+                max_tokens=50,
+                presence_penalty=0,
+                frequency_penalty=0,
+                best_of=1,
+            )
+
+            bot_response = response.choices[0].text.strip()
+            await message.channel.send(bot_response)
+
+    await bot.process_commands(message)
+    
 
 token = read_bot_token()
 bot.run(token)
