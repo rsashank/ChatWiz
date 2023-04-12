@@ -35,7 +35,7 @@ def read_openai_token():
         return data["OPENAI_TOKEN"]
 
 openai.api_key= read_openai_token()
-    
+
 bot=commands.Bot(
     command_prefix="!",
     intents=discord.Intents.all(),
@@ -47,6 +47,8 @@ bot=commands.Bot(
 async def on_ready():
     print(f'Logged in as: {bot.user}')
     await bot.load_extension("music") 
+    servers = len(bot.guilds)
+    await bot.change_presence(status=discord.Status.online, activity=discord.Game(f"in {servers} servers!"))
 
 @bot.command()
 async def help(ctx):
@@ -64,17 +66,16 @@ async def help(ctx):
     embed.add_field(name="!nowplaying", value="Shows the current song", inline=False)
     embed.add_field(name="!disconnect", value="Disconnects the bot", inline=False)
     embed.add_field(name="!gptchannel", value="Sets the GPT-3 chat channel", inline=False)
-    embed.add_field(name="!gpt3", value="Talk to GPT-3", inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
 async def ping(ctx):
-    embed=discord.Embed(title="Ping Command", description=f"🏓 Pong! {round(bot.latency * 1000)}ms", color=random.choice(ListColours))
+    embed=discord.Embed(title="Ping", description=f"🏓 Pong! {round(bot.latency * 1000)}ms", color=random.choice(ListColours))
     await ctx.reply(embed=embed)
 
 @bot.command()
 async def say(ctx, *, message):
-    embed=discord.Embed(title="Say Command", description=message, color=random.choice(ListColours))
+    embed=discord.Embed(title="Say", description=message, color=random.choice(ListColours))
     await ctx.reply(embed=embed)
 
 @bot.command()
@@ -92,10 +93,10 @@ async def remindme(ctx, time, *, message: str):
     elif time.lower().endswith("s"):
         seconds += int(time[:-1])
         counter = f"{seconds} seconds"
-    embed=discord.Embed(title="Remindme Command", description=f"Okay, I will remind you about \"{message}\" in {counter}.", color=random.choice(ListColours))
+    embed=discord.Embed(title="Remind Me", description=f"Okay, I will remind you about \"{message}\" in {counter}.", color=random.choice(ListColours))
     await ctx.reply(embed=embed)
     await asyncio.sleep(seconds)
-    embed=discord.Embed(description=f"You asked me to remind you about \"{message}\", {counter} ago. ", color=random.choice(ListColours))
+    embed=discord.Embed(title="Reminder", description=f"You asked me to remind you about \"{message}\", {counter} ago. ", color=random.choice(ListColours))
     await ctx.send(f"Hey {ctx.author.mention},", embed=embed)
 
 gpt3_channel_id = None
@@ -122,7 +123,8 @@ async def on_message(message):
             )
 
             bot_response = response.choices[0].text.strip()
-            await message.channel.send(bot_response)
+            embed=discord.Embed(title="GPT-3 Chat (text-davinci-003 model)", description=bot_response, color=random.choice(ListColours))
+            await message.channel.send(embed=embed)
 
     await bot.process_commands(message)
     
