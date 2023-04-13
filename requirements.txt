@@ -4,3 +4,4 @@ re
 json
 random
 lavalink
+openai
