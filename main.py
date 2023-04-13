@@ -52,21 +52,54 @@ async def on_ready():
 
 @bot.command()
 async def help(ctx):
-    embed=discord.Embed(title="Help", description="List of Commands:", color=random.choice(ListColours))
-    embed.add_field(name="!ping", value="Returns Pong!", inline=False)
-    embed.add_field(name="!say", value="Echoes your message", inline=False)
-    embed.add_field(name="!help", value="Help Menu", inline=False)
-    embed.add_field(name="!remindme", value="Reminds you after a given time", inline=False)
-    embed.add_field(name="!play", value="Plays a song", inline=False)
-    embed.add_field(name="!skip", value="Skips the current song", inline=False)
-    embed.add_field(name="!pause", value="Pauses the current song", inline=False)
-    embed.add_field(name="!resume", value="Resumes the current song", inline=False)
-    embed.add_field(name="!queue", value="Shows the queue", inline=False)
-    embed.add_field(name="!stop", value="Stops the music", inline=False)
-    embed.add_field(name="!nowplaying", value="Shows the current song", inline=False)
-    embed.add_field(name="!disconnect", value="Disconnects the bot", inline=False)
-    embed.add_field(name="!gptchannel", value="Sets the GPT-3 chat channel", inline=False)
-    await ctx.send(embed=embed)
+    embed1 = discord.Embed(title="Help", description="**General Commands (Page 1):**\n Press ▶️ to go to Music Commands.", color=random.choice(ListColours))
+    embed1.add_field(name="!ping", value="```Returns Pong!```", inline=False)
+    embed1.add_field(name="!say", value="```Echoes your message```", inline=False)
+    embed1.add_field(name="!help", value="```Help Menu```", inline=False)
+    embed1.add_field(name="!remindme", value="```Reminds you after a given time```", inline=False)
+    embed1.add_field(name="!gptchannel", value="```Sets the GPT-3 chat channel```", inline=False)
+
+
+    embed2 = discord.Embed(title="Help", description="**Music Commands (Page 2):**\n Press ◀️ to go to General Commands.", color=random.choice(ListColours))
+    embed2.add_field(name="!play", value="```Plays a song```", inline=False)
+    embed2.add_field(name="!skip", value="```Skips the current song```", inline=False)
+    embed2.add_field(name="!pause", value="```Pauses the current song```", inline=False)
+    embed2.add_field(name="!resume", value="```Resumes the current song```", inline=False)
+    embed2.add_field(name="!queue", value="```Shows the queue```", inline=False)
+    embed2.add_field(name="!stop", value="```Stops the music```", inline=False)
+    embed2.add_field(name="!nowplaying", value="```Shows the current song```", inline=False)
+    embed2.add_field(name="!disconnect", value="```Disconnects the bot```", inline=False)
+
+    pages = [embed1, embed2]
+    page_number = 0
+
+    message = await ctx.send(embed=pages[page_number])
+
+    await message.add_reaction('◀️')
+    await message.add_reaction('▶️')
+
+    def check(reaction, user):
+        return user == ctx.author and str(reaction.emoji) in ['◀️', '▶️']
+
+    while True:
+        try:
+            reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+        except asyncio.TimeoutError:
+            await message.clear_reactions()
+            break
+
+        if str(reaction.emoji) == '▶️' and page_number != len(pages) - 1:
+            page_number += 1
+            await message.edit(embed=pages[page_number])
+            await message.remove_reaction(reaction, user)
+
+        elif str(reaction.emoji) == '◀️' and page_number > 0:
+            page_number -= 1
+            await message.edit(embed=pages[page_number])
+            await message.remove_reaction(reaction, user)
+
+        else:
+            await message.remove_reaction(reaction, user)
 
 @bot.command()
 async def ping(ctx):
@@ -74,13 +107,23 @@ async def ping(ctx):
     await ctx.reply(embed=embed)
 
 @bot.command()
-async def say(ctx, *, message):
+async def say(ctx, *, message=None):
+    if not message:
+        embed=discord.Embed(title="Say", description="Please provide a message after the command. \n**Usage:** ```!say [message]```", color=random.choice(ListColours))
+        await ctx.reply(embed=embed)
+        return
+
     embed=discord.Embed(title="Say", description=message, color=random.choice(ListColours))
     await ctx.reply(embed=embed)
 
+
 @bot.command()
-async def remindme(ctx, time, *, message: str):
-    seconds=0
+async def remindme(ctx, time=None, *, message=None):
+    if not time or not message:
+        embed=discord.Embed(title="Say", description="You must provide a time and a message. \n**Example:** ```!remindme 1d do laundry```", color=random.choice(ListColours))
+        await ctx.reply(embed=embed)
+        return
+    seconds = 0
     if time.lower().endswith("d"):
         seconds += int(time[:-1]) * 60 * 60 * 24
         counter = f"{seconds // 60 // 60 // 24} days"
@@ -93,10 +136,10 @@ async def remindme(ctx, time, *, message: str):
     elif time.lower().endswith("s"):
         seconds += int(time[:-1])
         counter = f"{seconds} seconds"
-    embed=discord.Embed(title="Remind Me", description=f"Okay, I will remind you about \"{message}\" in {counter}.", color=random.choice(ListColours))
+    embed=discord.Embed(title="Remind Me", description=f"Okay, I will remind you about **\"{message}\" in {counter}**.", color=random.choice(ListColours))
     await ctx.reply(embed=embed)
     await asyncio.sleep(seconds)
-    embed=discord.Embed(title="Reminder", description=f"You asked me to remind you about \"{message}\", {counter} ago. ", color=random.choice(ListColours))
+    embed=discord.Embed(title="Reminder", description=f"You asked me to remind you about **\"{message}\", {counter} ago**. ", color=random.choice(ListColours))
     await ctx.send(f"Hey {ctx.author.mention},", embed=embed)
 
 gpt3_channel_id = None
@@ -115,7 +158,7 @@ async def on_message(message):
             response = openai.Completion.create(
                 model="text-davinci-003",
                 prompt=message.content,
-                temperature=0.5,
+                temperature=0.33,
                 max_tokens=50,
                 presence_penalty=0,
                 frequency_penalty=0,
