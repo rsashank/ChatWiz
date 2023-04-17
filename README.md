@@ -15,7 +15,7 @@ Reminders: Users can set reminders for themselves and others on the server, with
 ## Installation
 
 1. Clone this repository to your local machine.
-2. Update a file called secrets.json, with your OpenAI API Keys, and Discord Bot Token.
+2. Update a file called `secrets.json`, with your OpenAI API Keys, and Discord Bot Token.
 3. Open the `application.yml` file and update the following fields:
     - server address
     - server port
@@ -30,7 +30,7 @@ pip install -r requirements.txt
 1. Open a terminal window and navigate to the directory where you cloned the repository.
 2. Run the following command to start the bot:
 ```shell
-java -jar DiscordBot.jar
+java -jar Lavalink.jar
 ```
 
 ## Credits
